@@ -107,6 +107,11 @@ func retrieveNodeContainer(schema *yang.Entry, root interface{}, path *gpb.Path,
 	for i := 0; i < v.NumField(); i++ {
 		fv, ft := v.Field(i), v.Type().Field(i)
 
+		if !fv.CanSet() {
+			// skip over unexported fields
+			continue
+		}
+
 		cschema, err := util.ChildSchema(schema, ft)
 		if !util.IsYgotAnnotation(ft) {
 			switch {
@@ -249,6 +254,10 @@ func retrieveNodeList(schema *yang.Entry, root interface{}, path, traversedPath 
 		for i := 0; i < k.NumField(); i++ {
 			fieldName := listKeyT.Field(i).Name
 			fieldValue := k.Field(i)
+			if !fieldValue.CanSet() {
+				// skip unexported field
+				continue
+			}
 			if !fieldValue.IsValid() {
 				return nil, status.Errorf(codes.InvalidArgument, "invalid field %s in %T", fieldName, k)
 			}

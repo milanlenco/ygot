@@ -184,6 +184,11 @@ func validateStructElems(schema *yang.Entry, value interface{}) util.Errors {
 			continue
 		}
 
+		if !structElems.Field(i).CanSet() {
+			// skip over unexported fields
+			continue
+		}
+
 		fieldName := ft.Name
 		fieldValue := structElems.Field(i).Interface()
 
@@ -241,6 +246,10 @@ func validateListSchema(schema *yang.Entry) error {
 // key field name.
 func schemaNameToFieldName(structElems reflect.Value, schemaKeyFieldName string) (string, error) {
 	for i := 0; i < structElems.NumField(); i++ {
+		if !structElems.Field(i).CanSet() {
+			// unexported field
+			continue
+		}
 		ps, err := util.RelativeSchemaPath(structElems.Type().Field(i))
 		if err != nil {
 			return "", err
@@ -536,6 +545,10 @@ func unmarshalContainerWithListSchema(schema *yang.Entry, parent interface{}, va
 // key as the last path element.
 func getKeyValue(structVal reflect.Value, key string) (interface{}, error) {
 	for i := 0; i < structVal.NumField(); i++ {
+		if !structVal.Field(i).CanSet() {
+			// unexported field
+			continue
+		}
 		f := structVal.Type().Field(i)
 		p, err := util.RelativeSchemaPath(f)
 		if err != nil {

@@ -44,6 +44,20 @@ type ValidatedGoStruct interface {
 	ΛEnumTypeMap() map[string][]reflect.Type
 }
 
+// ValidatedGoStructExtended is an extension of ValidatedGoStruct which allows to build
+// path references (XPath, RESTCONF URI, etc.).
+type ValidatedGoStructExtended interface {
+	ValidatedGoStruct
+
+	// GetParent returns reference to the parent structure.
+	// Returns nil for the root.
+	GetParent() ValidatedGoStructExtended
+
+	// GetSchemaPath returns the container path in the YANG schema.
+	GetSchemaPath() (schemaPath, module, namespace string)
+}
+
+
 // ValidationOption is an interface that is implemented for each struct
 // which presents configuration parameters for validation options through the
 // Validate public API.
@@ -61,6 +75,16 @@ type KeyHelperGoStruct interface {
 	// ΛListKeyMap defines a helper method that returns a map of the
 	// keys of a list element.
 	ΛListKeyMap() (map[string]interface{}, error)
+}
+
+// MultiKeyHelperGoStruct is an extension of KeyHelperGoStruct, which
+// allows to get the order at which multiple list keys were defined in the YANG schema.
+type MultiKeyHelperGoStruct interface {
+	KeyHelperGoStruct
+
+	// ΛOrderedListKeys defines a helper method that returns a list of the
+	// keys in the order as defined in the YANG schema.
+	ΛOrderedListKeys() []string
 }
 
 // GoEnum is an interface which can be implemented by derived types which

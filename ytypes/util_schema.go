@@ -259,13 +259,18 @@ func schemaToStructFieldName(schema *yang.Entry, parent interface{}) (string, *y
 	switch t.Kind() {
 	case reflect.Map, reflect.Slice:
 		t = t.Elem()
+		v = v.Elem()
 	}
 	// If parent is a map of struct ptrs, still need to deref the element type.
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
+		v = v.Elem()
 	}
 
 	for i := 0; i < t.NumField(); i++ {
+		if !v.Field(i).CanSet() {
+			continue
+		}
 		f := t.Field(i)
 		fieldName := f.Name
 		p, err := util.RelativeSchemaPath(f)

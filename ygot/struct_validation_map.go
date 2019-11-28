@@ -147,6 +147,11 @@ func initialiseTree(t reflect.Type, v reflect.Value) {
 		fVal := v.Field(i)
 		fType := t.Field(i)
 
+		if !fVal.CanSet() {
+			// skip over unexported fields
+			continue
+		}
+
 		if util.IsTypeStructPtr(fType.Type) {
 			// Only initialise nested struct pointers, since all struct fields within
 			// a GoStruct are expected to be pointers, and we do not want to initialise
@@ -188,6 +193,10 @@ func pruneBranchesInternal(t reflect.Type, v reflect.Value) bool {
 	for i := 0; i < v.NumField(); i++ {
 		fVal := v.Field(i)
 		fType := t.Field(i)
+		if !fVal.CanSet() {
+			// skip over unexported fields
+			continue
+		}
 		if util.IsTypeStructPtr(fType.Type) {
 			// Create an empty version of the struct that is within the struct pointer.
 			// We can safely call Elem() here since we verified above that this type
@@ -507,7 +516,10 @@ func copyStruct(dstVal, srcVal reflect.Value) error {
 	for i := 0; i < srcVal.NumField(); i++ {
 		srcField := srcVal.Field(i)
 		dstField := dstVal.Field(i)
-
+		if !dstField.CanSet() {
+			// skip over unexported fields
+			continue
+		}
 		switch srcField.Kind() {
 		case reflect.Ptr:
 			if err := copyPtrField(dstField, srcField); err != nil {

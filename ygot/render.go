@@ -323,6 +323,11 @@ func findUpdatedLeaves(leaves map[*path]interface{}, s GoStruct, parent *gnmiPat
 		fval := sval.Field(i)
 		ftype := stype.Field(i)
 
+		if !fval.CanSet() {
+			// skip over unexported fields
+			continue
+		}
+
 		// Handle nil values, and enumerations specifically.
 		switch fval.Kind() {
 		case reflect.Map, reflect.Slice, reflect.Ptr, reflect.Interface:
@@ -907,6 +912,11 @@ func structJSON(s GoStruct, parentMod string, args jsonOutputConfig) (map[string
 	for i := 0; i < sval.NumField(); i++ {
 		field := sval.Field(i)
 		fType := stype.Field(i)
+
+		if !field.CanSet() {
+			// skip over unexported fields
+			continue
+		}
 
 		// Determine whether we should append a module name to the path in RFC7951
 		// output mode.

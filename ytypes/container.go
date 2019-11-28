@@ -54,6 +54,10 @@ func validateContainer(schema *yang.Entry, value ygot.GoStruct) util.Errors {
 		for i := 0; i < structElems.NumField(); i++ {
 			fieldType := structElems.Type().Field(i)
 			fieldName := fieldType.Name
+			if !structElems.Field(i).CanSet() {
+				// skip over unexported fields
+				continue
+			}
 			fieldValue := structElems.Field(i).Interface()
 
 			// Skip annotation fields when validating the schema.
@@ -151,6 +155,11 @@ func unmarshalStruct(schema *yang.Entry, parent interface{}, jsonTree map[string
 	for i := 0; i < destv.NumField(); i++ {
 		f := destv.Field(i)
 		ft := destv.Type().Field(i)
+
+		if !f.CanSet() {
+			// skip over unexported fields
+			continue
+		}
 
 		// Skip annotation fields since they do not have a schema.
 		// TODO(robjs): Implement unmarshalling annotations.

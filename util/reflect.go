@@ -626,6 +626,11 @@ func forEachFieldInternal(ni *NodeInfo, in, out interface{}, iterFunction FieldI
 		return nil
 	}
 
+	if !ni.FieldValue.CanSet() {
+		// skip unexported field
+		return nil
+	}
+
 	var errs Errors
 	errs = AppendErrs(errs, iterFunction(ni, in, out))
 
@@ -954,6 +959,10 @@ func getNodesContainer(schema *yang.Entry, root interface{}, path *gpb.Path) ([]
 		if IsYgotAnnotation(ft) {
 			continue
 		}
+		if !f.CanSet() {
+			// skip over unexported fields
+			continue
+		}
 
 		cschema, err := ChildSchema(schema, ft)
 		if err != nil {
@@ -1101,6 +1110,10 @@ func pathStructTagKey(f reflect.StructField) string {
 func getKeyValue(structVal reflect.Value, key string) (interface{}, error) {
 	for i := 0; i < structVal.NumField(); i++ {
 		f := structVal.Type().Field(i)
+		if !structVal.Field(i).CanSet() {
+			// unexported field
+			continue
+		}
 		p, err := RelativeSchemaPath(f)
 		if err != nil {
 			return nil, err

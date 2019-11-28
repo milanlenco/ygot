@@ -117,6 +117,10 @@ func getNodeContainer(schema *yang.Entry, rootStruct interface{}, path *gpb.Path
 		if util.IsYgotAnnotation(ft) {
 			continue
 		}
+		if !f.CanSet() {
+			// skip over unexported fields
+			continue
+		}
 
 		cschema, err := childSchema(schema, ft)
 		if err != nil {

@@ -110,6 +110,7 @@ func annotateEntry(e *yang.Entry, dn map[string]string) {
 	if e.IsDir() {
 		e.Annotation["schemapath"] = e.Path()
 	}
+	e.Annotation["namespace"] = e.Namespace().NName()
 }
 
 // WriteGzippedByteSlice takes an input slice of bytes, gzips it
